@@ -1,0 +1,288 @@
+# 目录
+
+<p align="right">Author: @zhangjq</p>
+<p align="right">2020-07-28</p>
+
+[TOC]
+
+
+
+# 生物设计中心代码风格规范
+
+对于交付给他人的工作代码，务必要满足**文件规范与交付规范**、**代码可读性规范**和**注释规范与文档规范**。（非发布代码可以不用写版权信息）
+
+简而言之，**交付代码**首先一定要做好
+
++ ==“五名”的命名规范==——从文件名到变量名要见文知意，除了计数器不准使用i j k做变量，函数命名必须动词+名词；
++ ==封装和逻辑分离==——单个函数不能超过80行；
++ ==三类注释信息==——别人调用函数时，不需要看一行代码，只要看文档注释就可以了；
++ ==文件头信息==——描述文件功能、用法和usage。
+
+具体的操作规范描述和例子见后文
+
+
+
+除了交付要求外，还分为基本要求和发布要求
+
+- 基本要求 （封装与代码可读）（PEP8）
+- 组内交付要求 （三类注释 + 文件头信息）
+- 发布要求（版权信息 + help）
+
+## 1.1 文件规范 & 交付规范
+
+### 1 文件头包含必要信息
+
+1. 文件头部加上 `#-*-conding:utf-8-*-`防止乱码；
+2. 三类文件头：版权信息、一句话文件作用、包导入信息（顺序不能乱）
+
+```python
+# Copyright 2016 Paul Balanca. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Convert a dataset to TFRecords format, which can be easily integrated into
+a TensorFlow pipeline.
+
+Usage:
+​```shell
+python tf_convert_data.py \
+    --dataset_name=pascalvoc \
+    --dataset_dir=/tmp/pascalvoc \
+    --output_name=pascalvoc \
+    --output_dir=/tmp/
+​```
+"""
+import tensorflow as tf
+from tensorflow.python.ops import control_flow_ops
+
+from datasets import dataset_factory
+from deployment import model_deploy
+from nets import nets_factory
+from preprocessing import preprocessing_factory
+import tf_utils
+
+slim = tf.contrib.slim
+
+DATA_FORMAT = 'NCHW'
+```
+
+### 2 文件内符合PEP8 编码规范
+
+> .py 文件必须符合PEP8规范，`Pycharm`中的快捷键 `Ctrl Alt L`可以一键格式化代码为符合PEP8规范的代码
+
+参考[PEP8 编码规范](https://www.python.org/dev/peps/pep-0008/)
+
+1. if/for/while等保留字与括号之间都必须加空格
+2. 函数传参时，逗号后加空格
+
+```python
+# bad
+a=[]
+b=a
+if a==b:
+    pass
+# good
+a = []
+b = a
+if a == b:
+    pass
+```
+
+
+
+## 1.2 代码可读性规范
+
+### 1  封装 & 逻辑分离
+
+1. 分函数、分文件、分模块；
+   1. **单个函数总行数（除注释外的签名、代码、空行、回车及任何不可见字符的总行数）不超过80行**
+2. 函数规定好传入传出值，变量的作用范围（作用域）尽可能小；
+
+### 2 “五名”要见文知意
+
+模块名、类名、函数~(方法)~名、变量名、常量名
+
+1. package名称**尽量保持小写**
+2. 类名常为**名词**或**名词短语**，例如 `Character或 ImmutableList`
+3. 函数名为**动词**或**动词短语**，例如 `send_message或者stop`
+4. 常量（内容不可更改的量）名称应全为大写，例如`CONSTANT_CASE`
+5. **不允许任何未经预先定义的常量**（魔法值）**直接出现在代码中**
+
+```python
+# 2. 类名
+# bad
+class A(object):
+a = 0
+m = ''
+# good
+class User(object):
+ageInYears = 0
+age_in_years = 0
+maidenName = ''
+maiden_name = ''
+
+# 4. 常量
+XX_THRESHOLD = 0.1
+# why: 见文知意表示看见命名就可知道是变量还是不可修改的常量，所以除了初始化之外，一切对常量的赋值（修改）都是非法操作（会导致bug）
+
+# 5. 不允许任何未经预先定义的常量（魔法值）直接出现在代码中
+# bad
+key = 'id#taobao_' + trade_id
+cache.put(key, value)
+# good
+CACHE_PREFIX = 'id#taobao_'
+key = CACHE_PREFIX + trade_id
+cache.put(key, value)
+# why: 开发者A定义了缓存的key，开发者B适用缓存时少了下划线，即 key是 "id#taobao" + trade_id，导致bug
+
+
+```
+
+
+
+
+
+## 1.3 足够的注释信息，注释即文档
+
+### 1 注释规范 & 函数注释写明作用、传参和返回值
+```Python
+def reshape_list(ls, shape=None):
+    """Reshape list of (list): 1D to 2D or the other way around.
+
+    Args:
+      ls: List or List of list.
+      shape: 1D or 2D shape.
+    Return
+      Reshaped list.
+    """
+	pass
+def split(s)
+	"""Splits a string on whitespace.  Repeated whitespace characters are collapsed.
+	@param s The string to split
+	@return A list of the whitespace-delimited parts of the input.
+	"""
+    pass
+```
+
+函数注释必须要详细写明这三类信息，当别人编写代码调用该函数时，他不需要看一行代码，只要看文档注释就可以了。
+
+如果函数有抛出异常，在注释中用Raise列出与接口有关的所有异常
+
+```python
+def fetch_bigtable_rows(big_table, keys, other_silly_variable=None):
+    """Fetches rows from a Bigtable.
+
+    Retrieves rows pertaining to the given keys from the Table instance
+    represented by big_table.  Silly things may happen if
+    other_silly_variable is not None.
+
+    Args:
+        big_table: An open Bigtable Table instance.
+        keys: A sequence of strings representing the key of each table row
+            to fetch.
+        other_silly_variable: Another optional variable, that has a much
+            longer name than the other args, and which does nothing.
+
+    Returns:
+        A dict mapping keys to the corresponding table row data
+        fetched. Each row is represented as a tuple of strings. For
+        example:
+
+        {'Serak': ('Rigel VII', 'Preparer'),
+         'Zim': ('Irk', 'Invader'),
+         'Lrrr': ('Omicron Persei 8', 'Emperor')}
+
+        If a key from the keys argument is missing from the dictionary,
+        then that row was not found in the table.
+
+    Raises:
+        IOError: An error occurred accessing the bigtable.Table object.
+    """
+    pass
+```
+
+
+
+### 2 help函数
+
+指明参数列表与用法
+
+```shell
+C:\Users\m1305>python -help
+usage: python [option] ... [-c cmd | -m mod | file | -] [arg] ...
+Options and arguments (and corresponding environment variables):
+-b     : issue warnings about str(bytes_instance), str(bytearray_instance)
+         and comparing bytes/bytearray with str. (-bb: issue errors)
+-B     : don't write .pyc files on import; also PYTHONDONTWRITEBYTECODE=x
+-c cmd : program passed in as string (terminates option list)
+-d     : debug output from parser; also PYTHONDEBUG=x
+-E     : ignore PYTHON* environment variables (such as PYTHONPATH)
+-h     : print this help message and exit (also --help)
+-i     : inspect interactively after running script; forces a prompt even
+         if stdin does not appear to be a terminal; also PYTHONINSPECT=x
+-I     : isolate Python from the user's environment (implies -E and -s)
+-m mod : run library module as a script (terminates option list)
+-O     : remove assert and __debug__-dependent statements; add .opt-1 before
+         .pyc extension; also PYTHONOPTIMIZE=x
+-OO    : do -O changes and also discard docstrings; add .opt-2 before
+         .pyc extension
+-q     : don't print version and copyright messages on interactive startup
+-s     : don't add user site directory to sys.path; also PYTHONNOUSERSITE
+-S     : don't imply 'import site' on initialization
+-u     : force the stdout and stderr streams to be unbuffered;
+         this option has no effect on stdin; also PYTHONUNBUFFERED=x
+-v     : verbose (trace import statements); also PYTHONVERBOSE=x
+         can be supplied multiple times to increase verbosity
+-V     : print the Python version number and exit (also --version)
+         when given twice, print more information about the build
+-W arg : warning control; arg is action:message:category:module:lineno
+         also PYTHONWARNINGS=arg
+-x     : skip first line of source, allowing use of non-Unix forms of #!cmd
+-X opt : set implementation-specific option. The following options are available:
+
+         -X faulthandler: enable faulthandler
+         -X showrefcount: output the total reference count and number of used
+             memory blocks when the program finishes or after each statement in the
+             interactive interpreter. This only works on debug builds
+         -X tracemalloc: start tracing Python memory allocations using the
+             tracemalloc module. By default, only the most recent frame is stored in a
+             traceback of a trace. Use -X tracemalloc=NFRAME to start tracing with a
+             traceback limit of NFRAME frames
+         -X showalloccount: output the total count of allocated objects for each
+             type when the program finishes. This only works when Python was built with
+             COUNT_ALLOCS defined
+         -X importtime: show how long each import takes. It shows module name,
+             cumulative time (including nested imports) and self time (excluding
+             nested imports). Note that its output may be broken in multi-threaded
+             application. Typical usage is python3 -X importtime -c 'import asyncio'
+         -X dev: enable CPython鈥檚 鈥渄evelopment mode鈥? introducing additional runtime
+             checks which are too expensive to be enabled by default. Effect of the
+             developer mode:
+                * Add default warning filter, as -W default
+                * Install debug hooks on memory allocators: see the PyMem_SetupDebugHooks() C function
+                * Enable the faulthandler module to dump the Python traceback on a crash
+                * Enable asyncio debug mode
+                * Set the dev_mode attribute of sys.flags to True
+                * io.IOBase destructor logs close() exceptions
+         -X utf8: enable UTF-8 mode for operating system interfaces, overriding the default
+             locale-aware mode. -X utf8=0 explicitly disables UTF-8 mode (even when it would
+             otherwise activate automatically)
+         -X pycache_prefix=PATH: enable writing .pyc files to a parallel tree rooted at the
+             given directory instead of to the code tree
+
+--check-hash-based-pycs always|default|never:
+    control how Python invalidates hash-based .pyc files
+file   : program read from script file
+-      : program read from stdin (default; interactive mode if a tty)
+arg ...: arguments passed to program in sys.argv[1:]
+```
