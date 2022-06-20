@@ -3,4 +3,3 @@
 
 
 [1-Cheminformatics]()
- + PatWalters'[practical cheminfo tutorial](https://github.com/PatWalters/practical_cheminformatics_tutorials)
