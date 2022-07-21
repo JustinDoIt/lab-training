@@ -18,7 +18,7 @@
 + 如何与合作者分享进展 Syn/share progress with mentors/collaborators
 
 ## 写作 Writing
-+ 一篇好论文的五个原则 ① Simple ② 
++ 一篇好论文的五个原则 ① Simple ② well organization
 + 科研绘图 
 + 写好学术邮件 & 冷邮件
 
