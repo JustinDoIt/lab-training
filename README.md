@@ -14,8 +14,8 @@
 ## 研究 Research
 + 如何追踪学术前沿 Tracking literature
 + 稳步推进研究 Steady Progress 
-+ 如何与导师合作 Work with mentor
-+ 如何与合作者分享进展 Syn with mentor/
++ 如何与导师合作 Work with mentors effectively
++ 如何与合作者分享进展 Syn/share progress with mentors/collaborators
 
 ## 写作 Writing
 + 一篇好论文的五个原则 ① Simple ② 
